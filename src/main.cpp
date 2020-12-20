@@ -1,52 +1,3 @@
- ### Лабораторная работа 4.3. MQTT в Mbed
-**Цель работы:** требуется написать программу, выполняющую подключение к MQTT серверу, используя Wi-Fi модуль, и получить данные в Mbed Studio.
-
-### Ход работы
-В примере рассматривается плата STM32 Nucleo и Wi-Fi модуль X Nucleo IDW01M1.
-
-![](img/1.jpg)
-Плата STM32 Nucleo
-
-![](img/2.png)
-Wi-Fi модуль X Nucleo IDW01M1, одетый на плату.
-
-В качестве заготовки для лабораторной работы код был взят из л.р. 3.2, полноценно подключающийся к Wi-Fi.
-![](img/3.PNG)
-
-Также в проект была импортирована библиотека mbed-mqtt.
-![](img/4.jpg)
-
-Далее был вставлен код из примера, но он был частично модернизирован, так как он был рассчитан только на 3 сообщения из топика, а именно теперь программа может принимать бесконечное число сообщений из топика.
-
-Mbed_app.json:
-```json
-{
-    "config": {
-        "wifi-ssid": {
-            "help": "WiFi SSID",
-            "value": "\"SSID\""
-        },
-        "wifi-password": {
-            "help": "WiFi Password",
-            "value": "\"PASSWORD\""
-        }
-    },
-    "target_overrides": {
-        "*": {
-            "platform.stdio-convert-newlines": true,
-            "idw0xx1.expansion-board": "IDW01M1",
-            "idw0xx1.provide-default": true,
-            "idw0xx1.tx": "PA_9",
-            "idw0xx1.rx": "PA_10",
-            "drivers.uart-serial-txbuf-size": 512,
-            "drivers.uart-serial-rxbuf-size": 512
-        }
-    }
-}
-```
-
-main.cpp:
-```C++
 #include "mbed.h"
 #include "SpwfSAInterface.h"
 #include "BlockExecuter.h"
@@ -196,7 +147,7 @@ int main()
 
 #ifdef MBED_MAJOR_VERSION
     printf("Mbed OS version %d.%d.%d\n\n", MBED_MAJOR_VERSION, MBED_MINOR_VERSION, MBED_PATCH_VERSION);
-#endif 
+#endif
 
     wifi = WiFiInterface::get_default_instance();
     if (!wifi) {
@@ -224,10 +175,9 @@ int main()
     printf("Gateway: %s\n", wifi->get_gateway());
     printf("RSSI: %d\n\n", wifi->get_rssi());
 
-    mqtt_demo(wifi);
+    mqtt_demo(wifi); // Функция mqtt
 
     wifi->disconnect();
 
     printf("\nDone\n");
 }
-```
