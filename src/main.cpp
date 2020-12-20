@@ -1,19 +1,3 @@
-/* WiFi Example
- * Copyright (c) 2016 ARM Limited
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 #include "mbed.h"
 #include "SpwfSAInterface.h"
 #include "BlockExecuter.h"
@@ -96,7 +80,9 @@ void mqtt_demo(NetworkInterface *net)
     message.payload = (void*)buf;
     message.payloadlen = strlen(buf)+1;
     rc = client.publish(topic, message);
-    while (arrivedcount < 1)
+	
+	
+    while (arrivedcount != -1) // Обычное сравнение было заменено с (arrivedcount < 2 и arrivedcount < 3) на вечный цикл
         client.yield(100);
  
     // QoS 1
@@ -189,7 +175,7 @@ int main()
     printf("Gateway: %s\n", wifi->get_gateway());
     printf("RSSI: %d\n\n", wifi->get_rssi());
 
-    mqtt_demo(wifi);
+    mqtt_demo(wifi); // Функция mqtt
 
     wifi->disconnect();
 
