@@ -25,15 +25,23 @@ const char *sec2str(nsapi_security_t sec)
     }
 }
 
-int arrivedcount = 0;
+int arrivedcount = 0; // Количество полученных сообщений
+
+/*
+	Функция messageArrieved выводит сообщение из топика
+ */
  
-void messageArrived(MQTT::MessageData& md)
+void messageArrived(MQTT::MessageData& md) 
 {
     MQTT::Message &message = md.message;
     printf("Message arrived: qos %d, retained %d, dup %d, packetid %d\r\n", message.qos, message.retained, message.dup, message.id);
     printf("Payload %.*s\r\n", message.payloadlen, (char*)message.payload);
     ++arrivedcount;
 }
+ 
+ /*
+	Функция MQTT
+ */
  
 void mqtt_demo(NetworkInterface *net)
 {
@@ -81,8 +89,17 @@ void mqtt_demo(NetworkInterface *net)
     message.payloadlen = strlen(buf)+1;
     rc = client.publish(topic, message);
 	
+	/*
+		while (arrivedcount < 2) // 2 сообщение
+			client.yield(100);
+	 
+		while (arrivedcount < 3) // 3 сообщение
+			client.yield(100);
+			
+		Этот код был заменан на код ниже:
+	*/
 	
-    while (arrivedcount != -1) // Обычное сравнение было заменено с (arrivedcount < 2 и arrivedcount < 3) на вечный цикл
+    while (arrivedcount != -1) 
         client.yield(100);
  
     // QoS 1
