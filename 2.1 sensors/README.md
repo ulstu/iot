@@ -1,8 +1,7 @@
 ## 2.1. Лабораторная работа: знакомимся с сенсорами
 
-### 2.1.1. Метеодатчик
+### 2.1.1. Датчик света
 
-В связи с отсутствием на момент выполнения работы метеодатчика, было принято решение заменить его на световой сенсор. 
 Необходимое оборудование: Световой сенсор
 
 ![](img/1.jpg)
@@ -11,18 +10,24 @@
 
 ***Код программы:***
 
-main.cpp:
+light_sensor.cpp:
 ```cpp
 #include "mbed.h"
 
+//AnalogIn - класс для считывания внешнего напряжения, приложенного к аналоговому входному выводу. 
+//PA_1 - порт, к которому подключен световой сенсор
 AnalogIn light_sensor(PA_1);
 
 int main()
 {
 	float res;
 	while (true) {
-		res = light_sensor.read()*100;
+	
+		//считывание светового сигнала
+		res = light_sensor.read()*100; 
 		printf("%2.2f\n",res);
+		
+		//сон за указанный период времени в мс
 		thread_sleep_for(1000);
 	}
 }
@@ -48,25 +53,35 @@ int main()
 
 ***Код программы:***
 
-main.cpp:
+accelerometer.cpp:
 ```cpp
 #include "mbed.h"
 #include "ADXL345_I2C.h"
 
-ADXL345_I2C accelerometr(I2C_SDA,I2C_SCL);
+ADXL345_I2C accelerometer(I2C_SDA,I2C_SCL); //I2C sda and scl
 
 int main()
 {
 	int readings[3] = {0,0,0};
 	printf("Starting ADXL345 text...\n");
-	accelerometr.setPowerControl(0x00);
-	accelerometr.setDataFormatControl(0x0B);
-	accelerometr.setDataRate(ADXL345_3200HZ);
-	accelerometr.setPowerControl(0x08);
+	
+	//Перейдите в режим ожидания, чтобы настроить устройство.
+	accelerometer.setPowerControl(0x00);
+	
+	// Полное разрешение, +/- 16 г, 4 мг / младший бит.
+	accelerometer.setDataFormatControl(0x0B);
+	
+	// Скорость передачи данных 3.2 кГц.
+	accelerometer.setDataRate(ADXL345_3200HZ);
+	
+	// Режим измерения.
+	accelerometer.setPowerControl(0x08);
 
 	while(1){
 		thread_sleep_for(1000);
-		accelerometr.getOutput(readings);
+		accelerometer.getOutput(readings);
+		
+		// 13-битные, знаковые расширенные значения.
 		printf("%i, %i, %i\n",(int16_t)readings[0],(int16_t)readings[1],(int16_t)readings[2]);
 	}
 }
@@ -79,7 +94,6 @@ int main()
 
 ### 2.1.3. Дальномер
 
-В связи с отсутствием на момент выполнения работы отладочной платы дальномера на основе VL6180, было принято решение заменить ее на ультразвуковой дальномер Grove Ultrasonic Ranger.
 Необходимое оборудование: дальномер Grove Ultrasonic Ranger.
 
 ![](img/6.jpg)
@@ -90,21 +104,22 @@ int main()
 
 ***Код программы:***
 
-main.cpp:
+range_finder.cpp:
 ```cpp
 #include "mbed.h"
 #include "RangeFinder.h"
 
+//Указываем pio(PA_1), scale(10), pulsetime(5000), timeout(100000)
 RangeFinder rf(PA_1,10,5000,100000);
 
 int main()
 {
 	float d;
 	while(1){
-		d =rf.read_m();
-		if(d ==-1.0){
+		d = rf.read_m();
+		if(d == -1.0){ // если есть ошибки подключения
 			printf("Timeout Error.\n");
-		}else if(d >5.0){
+		}else if(d > 5.0){ // если расстояние до объекта слишком большое
 			printf("No objects within detection range.\n");
 		}else{
 			printf("Distance = %f m.\n",d);
