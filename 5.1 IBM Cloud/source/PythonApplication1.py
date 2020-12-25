@@ -1,26 +1,30 @@
+# Подключаем библиотеки
 import json
 import time
 import paho.mqtt.client as mqtt
 
-device_token = "8*Y?YrelkALK)7jfDy"
-use_token_auth = "use-token-auth"
-org_id = "aev2o9"
-app_id = "iotlab51"
-device_type = "IOT"
-device_name = "type1"
+# Указываем идентификатор клиента, где hiber_device - идентификатор устройства (deviceId)
+client = mqtt.Client('d:quickstart:my_test:hiber_device')
 
-client = mqtt.Client('d:{}:{}:{}'.format(org_id, device_type, device_name))
+client.username_pw_set('use-token-auth', 'TOKEN')
+# Установка параметров подключения. В одинарных кавычках указывается адрес подключения, далее через запятую порт, в нашем случае 1883
+client.connect('quickstart.messaging.internetofthings.ibmcloud.com', 1883, 60) 
 
-client.username_pw_set(use_token_auth, device_token)
-result = client.connect('{}.messaging.internetofthings.ibmcloud.com'.format(org_id), 1883, 60)
+# Функция loop() должна вызываться регулярно, чтобы клиент мог обрабатывать входящие сообщения для отправки данных публикации и обновлять соединение.  
+client.loop()
+# Переменная temp отвечает за хранение значения температуры, присваиваем ей изначально значение 20
 temp = 20
-try:
-    while (True):
-        payload = {'d': {'temperature': temp}}
-        temp = 1 if temp % 900 == 0 else temp + 1
-        res = client.publish('iot-2/evt/statusEvent/fmt/json', json.dumps(payload))
-        print('published temperature {} {}'.format(temp, res))
-        time.sleep(1)
-except:
-    client.disconnect()
-    print('interrupted')
+# Цикл будет выполняться пока не остановить принудительно программу
+while (True):
+    # Связываем в payload ключ со значением, в нашем случае ключ это temperature, значение хранится в temp
+    payload = {'temperature': temp}
+    # Переменную temp увеличиваем на 1
+    temp += 1
+    # Публикуем в топик iot-2/evt/my_event/fmt/json(важно корректно указать эти параметры сообщения) и значение payload, связанное с ключом
+    client.publish('iot-2/evt/my_event/fmt/json', json.dumps(payload))
+    # Выводим надпись на экран о значении опубликованной в топик температуры
+    print('published temperature {}'.format(temp))
+    # Ждем 1 секунду
+    time.sleep(1)
+# Функция для разрыва соединения. 
+client.disconnect()
