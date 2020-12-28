@@ -90,3 +90,50 @@ iot-2/evt/my_event/fmt/json
 Далее создаётся график с данными key от 1 до 5 в разделе Dashboard:
  ![](img/14.png)
 
+Итак, для создания собственного устройства необходимо: 
+1. Зарегистрироваться в IBM Cloud
+2. Создать ресурс IBM IOT.
+3. В панели управления IBM IOT создать тип устройства. Запомнить название.
+4. В панели управления IBM IOT создать устройство заданного типа и запомнить название и token
+5. В панели управления IBM IOT создать приложение, запомнить API key и token.
+6. В настройках "Защита"(Security) - "Защита соединений" уровень защиты "Необязательный" TLS(TLS Optional).
+7. Пример программы по отправке данных с устройства:
+
+```Python
+import json
+import time
+import paho.mqtt.client as mqtt
+
+device_token = "IFMfqzwib-Q3JL8FF0"
+use_token_auth = "use-token-auth"
+org_id = "aev2o9"
+app_id = "iotlab17122020"
+device_type = "simple_device_type"
+device_name = "simple_device_1"
+
+client = mqtt.Client('d:{}:{}:{}'.format(org_id, device_type, device_name))
+
+client.username_pw_set(use_token_auth, device_token)
+result = client.connect('{}.messaging.internetofthings.ibmcloud.com'.format(org_id), 1883, 60)
+temp = 20
+try:
+    while (True):
+        payload = {'d': {'temperature': temp}}
+        temp = 1 if temp % 900 == 0 else temp + 1
+        res = client.publish('iot-2/evt/statusEvent/fmt/json', json.dumps(payload))
+        print('published temperature {} {}'.format(temp, res))
+        time.sleep(1)
+except:
+    client.disconnect()
+    print('interrupted')
+
+# https://www.ibm.com/support/knowledgecenter/SSQP8H/iot/platform/applications/mqtt.html
+```
+
+
+
+В этом примере мы передаём параметр температуры.Для отображения данных нам необходимо дополнительно создать в Dashboard линейный график (Line Chart) в параметрах которого выбираем наше устройство, далее указываем параметры Event(в нашем случае это statusEvent), Property(если все выполнено верно, параметр temperature появится в предложенных), Name(Любое имя) и тип данных, в нашем случае это Числа. 
+
+Результатом выполнения данных действий должен стать график изменения температуры. 
+
+
